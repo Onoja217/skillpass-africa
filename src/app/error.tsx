@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <main className="shell" style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}><div className="card" style={{ padding: 30, textAlign: "center" }}><h1>Something went wrong</h1><p style={{ color: "var(--muted)" }}>We could not load this page. Please try again.</p><button className="button" onClick={reset}>Try again</button></div></main>; }
