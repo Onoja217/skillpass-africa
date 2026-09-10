@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function AuthLayout({ children }: { children: React.ReactNode }) { return <main className="shell" style={{ minHeight: "100vh", display: "grid", placeItems: "center", paddingBlock: 32 }}><div style={{ width: "100%", display: "grid", placeItems: "center", gap: 22 }}><Link href="/" style={{ fontSize: 22, fontWeight: 900 }}>SkillPass <span style={{ color: "var(--green)" }}>Africa</span></Link>{children}</div></main>; }
