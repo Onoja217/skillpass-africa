@@ -180,3 +180,11 @@ using (
       and learner_id = auth.uid()
   )
 );
+
+alter table public.skill_verifications
+add column public_verification_id text
+unique
+check (
+  public_verification_id is null
+  or char_length(public_verification_id) between 8 and 30
+);
