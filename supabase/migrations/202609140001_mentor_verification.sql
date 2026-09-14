@@ -215,3 +215,45 @@ create trigger set_public_verification_id_trigger
 before insert on public.skill_verifications
 for each row
 execute procedure public.set_public_verification_id();
+  
+create or replace function public.get_public_skill_verification(
+  verification_public_id text
+)
+returns table (
+  public_verification_id text,
+  learner_name text,
+  skill_name text,
+  project_title text,
+  project_description text,
+  competency_rating integer,
+  verified_at timestamptz,
+  decision public.verification_decision
+)
+language sql
+security definer
+set search_path = ''
+as $$
+  select
+    sv.public_verification_id,
+    p.full_name,
+    ss.skill_name,
+    ss.title,
+    ss.description,
+    sv.competency_rating,
+    sv.verified_at,
+    sv.decision
+  from public.skill_verifications sv
+  join public.profiles p
+    on p.id = sv.learner_id
+  join public.skill_submissions ss
+    on ss.id = sv.submission_id
+  where sv.public_verification_id = verification_public_id
+    and sv.decision = 'approved'
+    and sv.public_verification_id is not null;
+$$;
+
+revoke all on function public.get_public_skill_verification(text)
+from public;
+
+grant execute on function public.get_public_skill_verification(text)
+to anon, authenticated;
