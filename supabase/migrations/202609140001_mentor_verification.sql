@@ -188,3 +188,30 @@ check (
   public_verification_id is null
   or char_length(public_verification_id) between 8 and 30
 );
+
+create or replace function public.generate_public_verification_id()
+returns text
+language plpgsql
+as $$
+begin
+  return 'SP-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8));
+end;
+$$;
+
+create or replace function public.set_public_verification_id()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.decision = 'approved' and new.public_verification_id is null then
+    new.public_verification_id := public.generate_public_verification_id();
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger set_public_verification_id_trigger
+before insert on public.skill_verifications
+for each row
+execute procedure public.set_public_verification_id();
