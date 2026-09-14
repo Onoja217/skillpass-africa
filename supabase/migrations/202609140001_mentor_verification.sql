@@ -119,3 +119,64 @@ to authenticated
 using (
   public.is_administrator()
 );
+
+create table public.verification_audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  verification_id uuid not null references public.skill_verifications(id) on delete cascade,
+  actor_id uuid not null references public.profiles(id) on delete restrict,
+  action public.verification_decision not null,
+  comments text check (comments is null or char_length(comments) <= 2000),
+  created_at timestamptz not null default now()
+);
+
+alter table public.verification_audit_logs enable row level security;
+
+create or replace function public.log_skill_verification()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.verification_audit_logs (
+    verification_id,
+    actor_id,
+    action,
+    comments
+  )
+  values (
+    new.id,
+    new.mentor_id,
+    new.decision,
+    new.feedback
+  );
+
+  return new;
+end;
+$$;
+
+create trigger skill_verification_audit_trigger
+after insert on public.skill_verifications
+for each row
+execute procedure public.log_skill_verification();
+
+create policy "Administrators can read all verification audit logs"
+on public.verification_audit_logs
+for select
+to authenticated
+using (
+  public.is_administrator()
+);
+
+create policy "Learners can read their own verification audit logs"
+on public.verification_audit_logs
+for select
+to authenticated
+using (
+  exists (
+    select 1
+    from public.skill_verifications
+    where id = verification_id
+      and learner_id = auth.uid()
+  )
+);
