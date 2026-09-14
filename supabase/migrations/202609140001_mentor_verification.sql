@@ -77,6 +77,7 @@ create policy "Approved mentors can create verifications"
 on public.skill_verifications
 for insert
 to authenticated
+
 with check (
   mentor_id = auth.uid()
   and public.is_approved_mentor()
@@ -85,4 +86,12 @@ with check (
     from public.skill_submissions
     where id = submission_id
   )
+);
+
+create policy "Approved mentors can read skill submissions"
+on public.skill_submissions
+for select
+to authenticated
+using (
+  public.is_approved_mentor()
 );
