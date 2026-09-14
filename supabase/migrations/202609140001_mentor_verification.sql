@@ -95,3 +95,27 @@ to authenticated
 using (
   public.is_approved_mentor()
 );
+
+create policy "Learners can read their own skill verifications"
+on public.skill_verifications
+for select
+to authenticated
+using (
+  learner_id = auth.uid()
+);
+create policy "Approved mentors can read their own verifications"
+on public.skill_verifications
+for select
+to authenticated
+using (
+  mentor_id = auth.uid()
+  and public.is_approved_mentor()
+);
+
+create policy "Administrators can read all skill verifications"
+on public.skill_verifications
+for select
+to authenticated
+using (
+  public.is_administrator()
+);
