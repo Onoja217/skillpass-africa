@@ -1,5 +1,12 @@
+
 export const roles = ["learner", "mentor", "employer", "administrator"] as const;
 export type UserRole = (typeof roles)[number];
+
+export const opportunityTypes = ["job", "internship", "apprenticeship", "volunteer"] as const;
+export type OpportunityType = (typeof opportunityTypes)[number];
+
+export const workArrangements = ["remote", "onsite", "hybrid"] as const;
+export type WorkArrangement = (typeof workArrangements)[number];
 
 export type Profile = {
   id: string;
@@ -15,6 +22,23 @@ export type Profile = {
   updated_at: string;
 };
 
+export type Opportunity = {
+  id: string;
+  employer_id: string;
+  title: string;
+  organization: string;
+  description: string;
+  opportunity_type: OpportunityType;
+  required_skills: string[];
+  location: string | null;
+  work_arrangement: WorkArrangement;
+  application_deadline: string | null;
+  application_instructions: string | null;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -24,10 +48,16 @@ export type Database = {
         Update: Partial<Omit<Profile, "id" | "role" | "email" | "created_at">>;
         Relationships: [];
       };
+      opportunities: {
+        Row: Opportunity;
+        Insert: Omit<Opportunity, "id" | "created_at" | "updated_at"> & { id?: string; created_at?: string; updated_at?: string };
+        Update: Partial<Omit<Opportunity, "id" | "employer_id" | "created_at">>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
-    Enums: { user_role: UserRole };
+    Enums: { user_role: UserRole; opportunity_type: OpportunityType; work_arrangement: WorkArrangement };
     CompositeTypes: Record<string, never>;
   };
 };
