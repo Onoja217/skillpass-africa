@@ -117,10 +117,24 @@ export default async function VerificationPage({
             </div>
 
             <div className="border-t pt-5">
-              <span className="inline-flex rounded-full border px-3 py-1 text-sm font-medium">
-                ✓ Verified
-              </span>
-            </div>
+  {verification.verification_status === "active" && (
+    <span className="inline-flex rounded-full border px-3 py-1 text-sm font-medium">
+      ✓ Verified
+    </span>
+  )}
+
+  {verification.verification_status === "revoked" && (
+    <span className="inline-flex rounded-full border px-3 py-1 text-sm font-medium">
+      ⚠ Verification revoked
+    </span>
+  )}
+
+  {verification.verification_status === "suspended" && (
+    <span className="inline-flex rounded-full border px-3 py-1 text-sm font-medium">
+      ⚠ Verification suspended
+    </span>
+  )}
+</div>
 
             <div className="border-t pt-6">
               <div className="flex flex-col items-center">

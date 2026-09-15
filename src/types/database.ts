@@ -78,6 +78,7 @@ export type Database = {
           competency_rating: number | null;
           verified_at: string;
           public_verification_id: string | null;
+          verification_status: "active" | "revoked" | "suspended";
         };
         Insert: {
           id?: string;
@@ -89,6 +90,7 @@ export type Database = {
           competency_rating?: number | null;
           verified_at?: string;
           public_verification_id?: string | null;
+          verification_status?: "active" | "revoked" | "suspended";
         };
         Update: {
           id?: string;
@@ -100,6 +102,7 @@ export type Database = {
           competency_rating?: number | null;
           verified_at?: string;
           public_verification_id?: string | null;
+          verification_status?: "active" | "revoked" | "suspended";
         };
         Relationships: [];
       };
