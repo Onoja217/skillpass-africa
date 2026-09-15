@@ -33,7 +33,20 @@ type Submission = { id: string; assessment_id: string; learner_id: string; writt
 type SubmissionFile = { id: string; submission_id: string; learner_id: string; file_path: string; original_filename: string; mime_type: string; file_size: number; created_at: string };
 type PortfolioItem = { id: string; learner_id: string; submission_id: string | null; title: string; description: string | null; is_public: boolean; created_at: string; updated_at: string };
 
-type Table<T> = { Row: T; Insert: Partial<Omit<T, "id" | "created_at" | "updated_at">> & { id?: string; created_at?: string; updated_at?: string }; Update: Partial<Omit<T, "id" | "created_at" | "updated_at">>; Relationships: [] };
+type Relationship = {
+  foreignKeyName: string;
+  columns: string[];
+  isOneToOne?: boolean;
+  referencedRelation: string;
+  referencedColumns: string[];
+};
+
+type Table<T, R extends Relationship[] = []> = {
+  Row: T;
+  Insert: Partial<Omit<T, "id" | "created_at" | "updated_at">> & { id?: string; created_at?: string; updated_at?: string };
+  Update: Partial<Omit<T, "id" | "created_at" | "updated_at">>;
+  Relationships: R;
+};
 
 type SkillVerification = {
   id: string;
@@ -50,18 +63,37 @@ type SkillVerification = {
 
 type VerificationAuditLog = { id: string; verification_id: string; actor_id: string; action: string; comments: string | null; created_at: string };
 
+type CategoryRelationships = [Relationship & { foreignKeyName: "skills_category_id_fkey"; columns: ["id"]; referencedRelation: "skills"; referencedColumns: ["category_id"] }];
+type SkillRelationships = [Relationship & { foreignKeyName: "skills_category_id_fkey"; columns: ["category_id"]; referencedRelation: "categories"; referencedColumns: ["id"] }];
+type AssessmentRelationships = [Relationship & { foreignKeyName: "assessments_skill_id_fkey"; columns: ["skill_id"]; referencedRelation: "skills"; referencedColumns: ["id"] }];
+type SubmissionRelationships = [
+  Relationship & { foreignKeyName: "submissions_assessment_id_fkey"; columns: ["assessment_id"]; referencedRelation: "assessments"; referencedColumns: ["id"] },
+  Relationship & { foreignKeyName: "submissions_learner_id_fkey"; columns: ["learner_id"]; referencedRelation: "profiles"; referencedColumns: ["id"] },
+  Relationship & { foreignKeyName: "submissions_reviewer_id_fkey"; columns: ["reviewer_id"]; referencedRelation: "profiles"; referencedColumns: ["id"] },
+];
+type PortfolioRelationships = [Relationship & { foreignKeyName: "portfolio_items_submission_id_fkey"; columns: ["submission_id"]; referencedRelation: "submissions"; referencedColumns: ["id"] }];
+type VerificationRelationships = [
+  Relationship & { foreignKeyName: "skill_verifications_submission_id_fkey"; columns: ["submission_id"]; referencedRelation: "submissions"; referencedColumns: ["id"] },
+  Relationship & { foreignKeyName: "skill_verifications_learner_id_fkey"; columns: ["learner_id"]; referencedRelation: "profiles"; referencedColumns: ["id"] },
+  Relationship & { foreignKeyName: "skill_verifications_mentor_id_fkey"; columns: ["mentor_id"]; referencedRelation: "profiles"; referencedColumns: ["id"] },
+];
+type AuditRelationships = [
+  Relationship & { foreignKeyName: "verification_audit_logs_verification_id_fkey"; columns: ["verification_id"]; referencedRelation: "skill_verifications"; referencedColumns: ["id"] },
+  Relationship & { foreignKeyName: "verification_audit_logs_actor_id_fkey"; columns: ["actor_id"]; referencedRelation: "profiles"; referencedColumns: ["id"] },
+];
+
 export type Database = {
   public: {
     Tables: {
       profiles: Table<Profile>;
-      categories: Table<Category>;
-      skills: Table<Skill>;
-      assessments: Table<Assessment>;
-      submissions: Table<Submission>;
+      categories: Table<Category, CategoryRelationships>;
+      skills: Table<Skill, SkillRelationships>;
+      assessments: Table<Assessment, AssessmentRelationships>;
+      submissions: Table<Submission, SubmissionRelationships>;
       submission_files: Table<SubmissionFile>;
-      portfolio_items: Table<PortfolioItem>;
-      skill_verifications: Table<SkillVerification>;
-      verification_audit_logs: Table<VerificationAuditLog>;
+      portfolio_items: Table<PortfolioItem, PortfolioRelationships>;
+      skill_verifications: Table<SkillVerification, VerificationRelationships>;
+      verification_audit_logs: Table<VerificationAuditLog, AuditRelationships>;
     };
     Views: Record<string, never>;
     Functions: {
