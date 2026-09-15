@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import VerificationQRCode from "@/components/verification/VerificationQRCode";
 
 type VerificationPageProps = {
   params: Promise<{
@@ -119,6 +120,22 @@ export default async function VerificationPage({
               <span className="inline-flex rounded-full border px-3 py-1 text-sm font-medium">
                 ✓ Verified
               </span>
+            </div>
+
+            <div className="border-t pt-6">
+              <div className="flex flex-col items-center">
+                <h2 className="text-lg font-semibold">
+                  Scan to verify
+                </h2>
+
+                <p className="mt-1 mb-4 text-center text-sm text-muted-foreground">
+                  Scan this QR code to open this public verification record.
+                </p>
+
+                <VerificationQRCode
+                  verificationId={verification.public_verification_id}
+                />
+              </div>
             </div>
           </div>
         </div>
