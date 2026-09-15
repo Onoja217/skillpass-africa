@@ -1,5 +1,7 @@
 export const roles = ["learner", "mentor", "employer", "administrator"] as const;
 export type UserRole = (typeof roles)[number];
+export const submissionStatuses = ["draft", "submitted", "under_review", "revision_requested", "verified", "rejected"] as const;
+export type SubmissionStatus = (typeof submissionStatuses)[number];
 
 export type Profile = {
   id: string;
@@ -15,19 +17,28 @@ export type Profile = {
   updated_at: string;
 };
 
+type Category = { id: string; name: string; created_at: string };
+type Skill = { id: string; name: string; description: string | null; category_id: string; created_at: string; updated_at: string };
+type Assessment = { id: string; title: string; skill_id: string; instructions: string; difficulty: string; deadline: string | null; criteria: string; created_by_id: string; created_at: string; updated_at: string };
+type Submission = { id: string; assessment_id: string; learner_id: string; written_response: string | null; project_link: string | null; video_link: string | null; status: SubmissionStatus; submitted_at: string | null; reviewed_at: string | null; created_at: string; updated_at: string };
+type SubmissionFile = { id: string; submission_id: string; file_path: string; original_filename: string; created_at: string };
+type PortfolioItem = { id: string; learner_id: string; submission_id: string | null; title: string; description: string | null; is_public: boolean; created_at: string; updated_at: string };
+type Table<T> = { Row: T; Insert: Partial<Omit<T, "id" | "created_at" | "updated_at">> & { id?: string; created_at?: string; updated_at?: string }; Update: Partial<Omit<T, "id" | "created_at" | "updated_at">>; Relationships: [] };
+
 export type Database = {
   public: {
     Tables: {
-      profiles: {
-        Row: Profile;
-        Insert: Omit<Profile, "created_at" | "updated_at"> & { created_at?: string; updated_at?: string };
-        Update: Partial<Omit<Profile, "id" | "role" | "email" | "created_at">>;
-        Relationships: [];
-      };
+      profiles: Table<Profile>;
+      categories: Table<Category>;
+      skills: Table<Skill>;
+      assessments: Table<Assessment>;
+      submissions: Table<Submission>;
+      submission_files: Table<SubmissionFile>;
+      portfolio_items: Table<PortfolioItem>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
-    Enums: { user_role: UserRole };
+    Enums: { user_role: UserRole; submission_status: SubmissionStatus };
     CompositeTypes: Record<string, never>;
   };
 };
