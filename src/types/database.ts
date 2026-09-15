@@ -35,6 +35,74 @@ export type Database = {
         >;
         Relationships: [];
       };
+
+      skill_submissions: {
+        Row: {
+          id: string;
+          learner_id: string;
+          skill_name: string;
+          title: string;
+          description: string | null;
+          evidence_url: string | null;
+          submitted_at: string;
+        };
+        Insert: {
+          id?: string;
+          learner_id: string;
+          skill_name: string;
+          title: string;
+          description?: string | null;
+          evidence_url?: string | null;
+          submitted_at?: string;
+        };
+        Update: {
+          id?: string;
+          learner_id?: string;
+          skill_name?: string;
+          title?: string;
+          description?: string | null;
+          evidence_url?: string | null;
+          submitted_at?: string;
+        };
+        Relationships: [];
+      };
+
+      skill_verifications: {
+        Row: {
+          id: string;
+          submission_id: string;
+          learner_id: string;
+          mentor_id: string;
+          decision: "approved" | "rejected" | "revision_requested";
+          feedback: string | null;
+          competency_rating: number | null;
+          verified_at: string;
+          public_verification_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          submission_id: string;
+          learner_id: string;
+          mentor_id: string;
+          decision: "approved" | "rejected" | "revision_requested";
+          feedback?: string | null;
+          competency_rating?: number | null;
+          verified_at?: string;
+          public_verification_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          submission_id?: string;
+          learner_id?: string;
+          mentor_id?: string;
+          decision?: "approved" | "rejected" | "revision_requested";
+          feedback?: string | null;
+          competency_rating?: number | null;
+          verified_at?: string;
+          public_verification_id?: string | null;
+        };
+        Relationships: [];
+      };
     };
 
     Views: Record<string, never>;
