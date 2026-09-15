@@ -39,7 +39,13 @@ export async function submitAssessment(formData: FormData) {
     const path = `${profile.id}/${savedId}/${crypto.randomUUID()}-${safeName}`;
     const upload = await supabase.storage.from("submission-evidence").upload(path, file, { contentType: file.type, upsert: false });
     if (upload.error) throw new Error(upload.error.message);
-    const record = await supabase.from("submission_files").insert({ submission_id: savedId, file_path: path, original_filename: file.name });
+    const record = await supabase.from("submission_files").insert({
+      submission_id: savedId,
+      file_path: path,
+      original_filename: file.name,
+      mime_type: file.type,
+      file_size: file.size,
+    });
     if (record.error) {
       await supabase.storage.from("submission-evidence").remove([path]);
       throw new Error(record.error.message);
