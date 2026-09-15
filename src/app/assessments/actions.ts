@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
+import type { SubmissionStatus } from "@/types/database";
 
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf", "text/plain", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]);
 const maxFileSize = 10 * 1024 * 1024;
@@ -18,7 +19,7 @@ export async function submitAssessment(formData: FormData) {
   const writtenResponse = String(formData.get("written_response") ?? "").trim() || null;
   const projectLink = String(formData.get("project_link") ?? "").trim() || null;
   const videoLink = String(formData.get("video_link") ?? "").trim() || null;
-  const status = intent === "submit" ? "submitted" : "draft";
+  const status: SubmissionStatus = intent === "submit" ? "submitted" : "draft";
   const payload = { assessment_id: assessmentId, learner_id: profile.id, written_response: writtenResponse, project_link: projectLink, video_link: videoLink, status, ...(intent === "submit" ? { submitted_at: new Date().toISOString() } : {}) };
 
   let savedId = submissionId;
