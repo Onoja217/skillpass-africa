@@ -21,7 +21,7 @@ type Category = { id: string; name: string; created_at: string };
 type Skill = { id: string; name: string; description: string | null; category_id: string; created_at: string; updated_at: string };
 type Assessment = { id: string; title: string; skill_id: string; instructions: string; difficulty: string; deadline: string | null; criteria: string; created_by_id: string; created_at: string; updated_at: string };
 type Submission = { id: string; assessment_id: string; learner_id: string; written_response: string | null; project_link: string | null; video_link: string | null; status: SubmissionStatus; submitted_at: string | null; reviewed_at: string | null; created_at: string; updated_at: string };
-type SubmissionFile = { id: string; submission_id: string; file_path: string; original_filename: string; created_at: string };
+type SubmissionFile = { id: string; submission_id: string; learner_id: string; file_path: string; original_filename: string; mime_type: string; file_size: number; created_at: string };
 type PortfolioItem = { id: string; learner_id: string; submission_id: string | null; title: string; description: string | null; is_public: boolean; created_at: string; updated_at: string };
 type Table<T> = { Row: T; Insert: Partial<Omit<T, "id" | "created_at" | "updated_at">> & { id?: string; created_at?: string; updated_at?: string }; Update: Partial<Omit<T, "id" | "created_at" | "updated_at">>; Relationships: [] };
 
