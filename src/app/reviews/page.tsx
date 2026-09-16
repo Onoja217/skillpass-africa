@@ -15,7 +15,8 @@ type ReviewSubmission = {
 
 export default async function ReviewsPage() {
   const profile = await getCurrentProfile();
-  if (!["mentor", "administrator"].includes(profile.role)) return <main className="shell" style={{ paddingBlock: 30 }}><h1>Review workspace</h1><p>You do not have permission to review submissions.</p></main>;
+  const canReview = profile.role === "administrator" || (profile.role === "mentor" && profile.mentor_status === "approved");
+  if (!canReview) return <main className="shell" style={{ paddingBlock: 30 }}><h1>Review workspace</h1><p>You do not have permission to review submissions.</p></main>;
   const supabase = await createClient();
   const { data: rawSubmissions } = await supabase
     .from("submissions")

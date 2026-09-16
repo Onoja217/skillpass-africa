@@ -7,10 +7,11 @@ import { dashboardPath } from "@/lib/roles";
 import { roles } from "@/types/database";
 
 export type AuthState = { error?: string; success?: string };
+const selfServiceRoles = roles.filter((role) => role !== "administrator") as ["learner", "mentor", "employer"];
 const credentials = z.object({ email: z.string().email(), password: z.string().min(8, "Password must be at least 8 characters") });
 
 export async function register(_: AuthState, formData: FormData): Promise<AuthState> {
-  const parsed = credentials.extend({ fullName: z.string().trim().min(2), role: z.enum(roles) }).safeParse({ email: formData.get("email"), password: formData.get("password"), fullName: formData.get("fullName"), role: formData.get("role") });
+  const parsed = credentials.extend({ fullName: z.string().trim().min(2).max(100), role: z.enum(selfServiceRoles) }).safeParse({ email: formData.get("email"), password: formData.get("password"), fullName: formData.get("fullName"), role: formData.get("role") });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const supabase = await createClient();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
