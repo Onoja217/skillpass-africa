@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
@@ -134,7 +135,7 @@ export default async function AdministratorAuditPage({
           <input type="date" name="from" defaultValue={from} aria-label="Start date" />
           <input type="date" name="to" defaultValue={to} aria-label="End date" />
           <button className="button" type="submit">Apply filters</button>
-          <a className="button secondary" href="/dashboard/administrator/audit">Clear</a>
+          <Link className="button secondary" href="/dashboard/administrator/audit">Clear</Link>
         </form>
       </section>
 
@@ -142,8 +143,8 @@ export default async function AdministratorAuditPage({
         <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "center" }}><div><p className="eyebrow" style={{ margin: 0 }}>Audit trail</p><h2 style={{ margin: "8px 0 0" }}>Platform activity</h2></div><span style={{ color: "var(--muted)", fontSize: 13 }}>Page {Math.min(page, totalPages)} of {totalPages}</span></div>
         <div style={{ overflowX: "auto", marginTop: 18 }}><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 980 }}><thead><tr>{["Activity", "Actor", "Entity", "Details", "Time"].map((heading) => <th key={heading} style={{ textAlign: "left", padding: "10px 8px", borderBottom: "1px solid #e5e7eb", color: "var(--muted)", fontSize: 12 }}>{heading}</th>)}</tr></thead><tbody>{logs.map((log) => { const actor = log.actor_id ? actorMap.get(log.actor_id) : null; return <tr key={log.id}><td style={{ padding: "14px 8px", borderBottom: "1px solid #f1f5f9" }}><strong>{actionLabels[log.action] ?? log.action}</strong><div style={{ color: "var(--muted)", fontSize: 12, marginTop: 3 }}>{log.description}</div></td><td style={{ padding: "14px 8px", borderBottom: "1px solid #f1f5f9" }}>{actor?.full_name ?? "System"}<div style={{ color: "var(--muted)", fontSize: 12 }}>{roleLabel(log.actor_role)}</div></td><td style={{ padding: "14px 8px", borderBottom: "1px solid #f1f5f9" }}>{log.entity_type}<div style={{ color: "var(--muted)", fontSize: 11 }}>{log.entity_id ?? "—"}</div></td><td style={{ padding: "14px 8px", borderBottom: "1px solid #f1f5f9", maxWidth: 320 }}><details><summary style={{ cursor: "pointer", fontWeight: 700 }}>Inspect event</summary><pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", fontSize: 11, marginTop: 10 }}>{JSON.stringify(log.metadata, null, 2)}</pre>{log.ip_address && <div style={{ color: "var(--muted)", fontSize: 11 }}>IP: {log.ip_address}</div>}</details></td><td style={{ padding: "14px 8px", borderBottom: "1px solid #f1f5f9", whiteSpace: "nowrap", color: "var(--muted)", fontSize: 12 }}>{formatDate(log.created_at)}</td></tr>; })}{!logs.length && <tr><td colSpan={5} style={{ padding: 20, color: "var(--muted)" }}>No audit events match the selected filters.</td></tr>}</tbody></table></div>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginTop: 18 }}>
-          {page > 1 ? <a className="button secondary" href={buildPageUrl(page - 1)}>Previous</a> : <span />}
-          {page < totalPages ? <a className="button secondary" href={buildPageUrl(page + 1)}>Next</a> : <span />}
+          {page > 1 ? <Link className="button secondary" href={buildPageUrl(page - 1)}>Previous</Link> : <span />}
+          {page < totalPages ? <Link className="button secondary" href={buildPageUrl(page + 1)}>Next</Link> : <span />}
         </div>
       </section>
 
