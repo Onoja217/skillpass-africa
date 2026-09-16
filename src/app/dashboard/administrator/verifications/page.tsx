@@ -3,6 +3,15 @@ import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import VerificationManagementCenter from "./VerificationManagementCenter";
 
+type VerificationAuditEntry = {
+  id: string;
+  verification_id: string;
+  actor_id: string;
+  action: string;
+  comments: string | null;
+  created_at: string;
+};
+
 export default async function AdministratorVerificationsPage() {
   const profile = await getCurrentProfile();
   if (profile.role !== "administrator") redirect(`/dashboard/${profile.role}`);
@@ -37,7 +46,7 @@ export default async function AdministratorVerificationsPage() {
   const verificationIds = (verifications ?? []).map((item) => item.id);
   const { data: auditLogs } = verificationIds.length
     ? await supabase.from("verification_audit_logs").select("id, verification_id, actor_id, action, comments, created_at").in("verification_id", verificationIds).order("created_at", { ascending: false })
-    : { data: [] };
+    : { data: [] as VerificationAuditEntry[] };
   const actorIds = [...new Set((auditLogs ?? []).map((item) => item.actor_id))];
   const { data: actors } = actorIds.length
     ? await supabase.from("profiles").select("id, full_name").in("id", actorIds)
@@ -49,7 +58,7 @@ export default async function AdministratorVerificationsPage() {
   const assessmentMap = new Map((assessments ?? []).map((item) => [item.id, item]));
   const skillMap = new Map((skills ?? []).map((item) => [item.id, item]));
   const actorMap = new Map((actors ?? []).map((item) => [item.id, item]));
-  const auditMap = new Map<string, NonNullable<typeof auditLogs>>();
+  const auditMap = new Map<string, VerificationAuditEntry[]>();
 
   for (const entry of auditLogs ?? []) {
     const entries = auditMap.get(entry.verification_id) ?? [];
