@@ -49,3 +49,18 @@ export async function createOpportunity(formData: {
   revalidatePath("/dashboard/employer");
   return data;
 }
+export async function listOpportunities() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("opportunities")
+    .select("*")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
