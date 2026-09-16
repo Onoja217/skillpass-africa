@@ -44,7 +44,24 @@ export async function updatePassword(_: AuthState, formData: FormData): Promise<
   if (!password.success) return { error: password.error.issues[0].message };
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: password.data });
-  return error ? { error: error.message } : { success: "Password updated. You can continue to your dashboard." };
+  if (error) return { error: error.message };
+  await supabase.rpc("record_auth_security_event", {
+    event_action: "SECURITY_EVENT",
+    event_type: "PASSWORD_CHANGED",
+    event_description: "User password changed",
+    event_metadata: { source: "password_update" },
+  });
+  return { success: "Password updated. You can continue to your dashboard." };
 }
 
-export async function logout() { const supabase = await createClient(); await supabase.auth.signOut(); redirect("/login"); }
+export async function logout() {
+  const supabase = await createClient();
+  await supabase.rpc("record_auth_security_event", {
+    event_action: "LOGOUT",
+    event_type: "LOGOUT",
+    event_description: "User signed out",
+    event_metadata: { source: "logout_action" },
+  });
+  await supabase.auth.signOut();
+  redirect("/login");
+}
