@@ -82,3 +82,24 @@ export async function listMyOpportunities() {
 
   return data;
 }
+
+export async function togglePublish(opportunityId: string, publish: boolean) {
+  const profile = await getCurrentProfile();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("opportunities")
+    .update({ is_published: publish })
+    .eq("id", opportunityId)
+    .eq("employer_id", profile.id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/dashboard/employer");
+  revalidatePath("/opportunities");
+  return data;
+}
