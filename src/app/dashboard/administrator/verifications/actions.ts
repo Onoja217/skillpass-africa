@@ -14,8 +14,10 @@ export async function updateVerificationStatus(
   if (!user) throw new Error("You must be signed in.");
   if (!["active", "revoked", "suspended"].includes(status)) throw new Error("Invalid verification status.");
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || profile.role !== "administrator") throw new Error("Only administrators can change verification status.");
+  const { data: permitted, error: permissionError } = await supabase.rpc("has_admin_permission", {
+    required_permission: "verifications.review",
+  });
+  if (permissionError || !permitted) throw new Error("You do not have permission to manage verification records.");
 
   const { error } = await supabase
     .from("skill_verifications")
@@ -24,5 +26,6 @@ export async function updateVerificationStatus(
 
   if (error) throw new Error(error.message);
   revalidatePath("/dashboard/administrator/verifications");
+  revalidatePath("/dashboard/administrator");
   return { success: true };
 }
