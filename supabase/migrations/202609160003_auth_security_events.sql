@@ -32,18 +32,20 @@ begin
 
   select role into current_role from public.profiles where id = current_user_id;
 
-  insert into public.login_activity (
-    user_id,
-    event_type,
-    success,
-    created_at
-  )
-  values (
-    current_user_id,
-    event_type,
-    true,
-    now()
-  );
+  if event_type in ('LOGOUT', 'SESSION_EXPIRED') then
+    insert into public.login_activity (
+      user_id,
+      event_type,
+      success,
+      created_at
+    )
+    values (
+      current_user_id,
+      event_type,
+      true,
+      now()
+    );
+  end if;
 
   insert into public.audit_logs (
     actor_id,
