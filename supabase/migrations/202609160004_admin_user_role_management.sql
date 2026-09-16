@@ -38,28 +38,12 @@ begin
     values (new.id, old.role, new.role, coalesce(actor, new.id), 'Administrator role change');
 
     insert into public.audit_logs (actor_id, actor_role, action, entity_type, entity_id, description, metadata)
-    values (
-      actor,
-      case when actor is null then null else (select role from public.profiles where id = actor) end,
-      'ROLE_CHANGED',
-      'profile',
-      new.id,
-      'User role changed from ' || old.role::text || ' to ' || new.role::text || '.',
-      jsonb_build_object('previous_role', old.role, 'new_role', new.role)
-    );
+    values (actor, case when actor is null then null else (select role from public.profiles where id = actor) end, 'ROLE_CHANGED', 'profile', new.id, 'User role changed from ' || old.role::text || ' to ' || new.role::text || '.', jsonb_build_object('previous_role', old.role, 'new_role', new.role));
   end if;
 
   if new.account_status is distinct from old.account_status then
     insert into public.audit_logs (actor_id, actor_role, action, entity_type, entity_id, description, metadata)
-    values (
-      actor,
-      case when actor is null then null else (select role from public.profiles where id = actor) end,
-      case when new.account_status = 'suspended' then 'USER_SUSPENDED' else 'USER_REACTIVATED' end,
-      'profile',
-      new.id,
-      case when new.account_status = 'suspended' then 'User account suspended.' else 'User account reactivated.' end,
-      jsonb_build_object('previous_status', old.account_status, 'new_status', new.account_status)
-    );
+    values (actor, case when actor is null then null else (select role from public.profiles where id = actor) end, case when new.account_status = 'suspended' then 'USER_SUSPENDED' else 'USER_REACTIVATED' end, 'profile', new.id, case when new.account_status = 'suspended' then 'User account suspended.' else 'User account reactivated.' end, jsonb_build_object('previous_status', old.account_status, 'new_status', new.account_status));
   end if;
 
   return new;
@@ -96,46 +80,26 @@ begin
   end if;
 
   select * into target from public.profiles where id = target_user_id for update;
-  if target.id is null then
-    raise exception 'User not found.' using errcode = 'P0002';
-  end if;
+  if target.id is null then raise exception 'User not found.' using errcode = 'P0002'; end if;
 
-  if new_role is null then
-    new_role := target.role;
-  end if;
-  if new_account_status is null then
-    new_account_status := target.account_status;
-  end if;
+  if new_role is null then new_role := target.role; end if;
+  if new_account_status is null then new_account_status := target.account_status; end if;
 
   if target.role = 'administrator' and new_role <> 'administrator' then
     select count(*) into administrator_count from public.profiles where role = 'administrator';
-    if administrator_count <= 1 then
-      raise exception 'The platform must retain at least one administrator.' using errcode = '42501';
-    end if;
+    if administrator_count <= 1 then raise exception 'The platform must retain at least one administrator.' using errcode = '42501'; end if;
   end if;
 
-  if new_role = target.role and new_account_status = target.account_status then
-    return target;
-  end if;
+  if new_role = target.role and new_account_status = target.account_status then return target; end if;
 
   update public.profiles
-  set role = new_role,
-      account_status = new_account_status,
-      updated_at = now()
+  set role = new_role, account_status = new_account_status, updated_at = now()
   where id = target_user_id
   returning * into updated;
 
   if change_reason is not null and char_length(trim(change_reason)) > 0 then
     insert into public.audit_logs (actor_id, actor_role, action, entity_type, entity_id, description, metadata)
-    values (
-      actor,
-      'administrator',
-      'ADMIN_ACTION',
-      'profile',
-      target_user_id,
-      'Administrator updated user access settings.',
-      jsonb_build_object('reason', left(trim(change_reason), 500))
-    );
+    values (actor, 'administrator', 'ADMIN_ACTION', 'profile', target_user_id, 'Administrator updated user access settings.', jsonb_build_object('reason', left(trim(change_reason), 500)));
   end if;
 
   return updated;
@@ -144,6 +108,9 @@ $$;
 
 revoke all on function public.admin_update_user(uuid, public.user_role, public.account_status, text) from public, anon;
 grant execute on function public.admin_update_user(uuid, public.user_role, public.account_status, text) to authenticated;
+
+revoke update on public.profiles from authenticated;
+grant update (full_name, phone, location, biography, avatar_url, selected_skills) on public.profiles to authenticated;
 
 comment on table public.role_history is 'Append-only record of user role changes for administrator accountability.';
 comment on function public.admin_update_user(uuid, public.user_role, public.account_status, text) is 'Administrator-only trusted entry point for changing user role and account status.';
