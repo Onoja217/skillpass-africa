@@ -3,6 +3,8 @@
 :root {
 	--brand-black: #080b09;
 	--brand-green: #00a83b;
+	--brand-green-bright: #00d94f;
+	--brand-white: #ffffff;
 }
 
 .brand {
@@ -14,9 +16,11 @@
 	font-weight: 900;
 	line-height: 1;
 	text-decoration: none;
+	white-space: nowrap;
 }
 
-.brand-inverse { color: white; }
+.brand-name span { color: var(--ink); }
+.brand-inverse { color: var(--brand-white); }
 .brand-compact { font-size: 20px; }
 
 .brand-mark {
@@ -28,6 +32,7 @@
 	overflow: hidden;
 	border-radius: 50% 50% 50% 12px;
 	background: var(--brand-green);
+	box-shadow: 0 0 0 2px rgba(0, 168, 59, .18);
 	transform: rotate(-12deg);
 }
 
@@ -63,9 +68,10 @@
 	transform: rotate(-32deg);
 }
 
-.brand-name span { color: currentColor; }
 .brand-name strong, .brand-name em { color: var(--brand-green); font-style: normal; }
 .brand-name em { margin-left: 5px; font-size: .58em; letter-spacing: .04em; text-transform: uppercase; }
+.brand-inverse .brand-name strong, .brand-inverse .brand-name em { color: var(--brand-green-bright); }
+.brand-inverse .brand-mark { box-shadow: 0 0 0 2px rgba(216, 239, 131, .7); }
 :root { --ink: #10231d; --muted: #63736d; --cream: #f7f3e8; --green: #176b4d; --lime: #d8ef83; }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
