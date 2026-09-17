@@ -1,5 +1,77 @@
 @import "tailwindcss";
 
+:root {
+	--brand-black: #080b09;
+	--brand-green: #00a83b;
+	--brand-green-bright: #00d94f;
+	--brand-white: #ffffff;
+}
+
+.brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	color: var(--ink);
+	font-size: 21px;
+	font-weight: 900;
+	line-height: 1;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.brand-name span { color: var(--ink); }
+.brand-inverse { color: var(--brand-white); }
+.brand-compact { font-size: 20px; }
+
+.brand-mark {
+	position: relative;
+	display: inline-grid;
+	width: 31px;
+	height: 31px;
+	place-items: center;
+	overflow: hidden;
+	border-radius: 50% 50% 50% 12px;
+	background: var(--brand-green);
+	box-shadow: 0 0 0 2px rgba(0, 168, 59, .18);
+	transform: rotate(-12deg);
+}
+
+.brand-mark::before {
+	content: "";
+	width: 17px;
+	height: 12px;
+	border: 4px solid var(--brand-black);
+	border-top: 0;
+	border-radius: 0 0 50% 50%;
+	transform: rotate(12deg);
+}
+
+.brand-mark::after {
+	content: "";
+	position: absolute;
+	top: 3px;
+	width: 13px;
+	height: 7px;
+	background: var(--brand-black);
+	clip-path: polygon(50% 0, 100% 38%, 50% 76%, 0 38%);
+	transform: rotate(12deg);
+}
+
+.brand-check {
+	position: absolute;
+	right: 5px;
+	bottom: 6px;
+	width: 7px;
+	height: 4px;
+	border-bottom: 2px solid var(--brand-black);
+	border-left: 2px solid var(--brand-black);
+	transform: rotate(-32deg);
+}
+
+.brand-name strong, .brand-name em { color: var(--brand-green); font-style: normal; }
+.brand-name em { margin-left: 5px; font-size: .58em; letter-spacing: .04em; text-transform: uppercase; }
+.brand-inverse .brand-name strong, .brand-inverse .brand-name em { color: var(--brand-green-bright); }
+.brand-inverse .brand-mark { box-shadow: 0 0 0 2px rgba(216, 239, 131, .7); }
 :root { --ink: #10231d; --muted: #63736d; --cream: #f7f3e8; --green: #176b4d; --lime: #d8ef83; }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
