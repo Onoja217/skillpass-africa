@@ -33,3 +33,23 @@ export async function applyToOpportunity(opportunityId: string, coverNote?: stri
   revalidatePath("/opportunities");
   return data;
 }
+export async function getMyApplicationIds() {
+  const profile = await getCurrentProfile();
+
+  if (profile.role !== "learner") {
+    return [];
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("applications")
+    .select("opportunity_id")
+    .eq("learner_id", profile.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data.map((row) => row.opportunity_id);
+}
