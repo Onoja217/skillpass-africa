@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { listMyOpportunities } from "@/lib/opportunities";
 import { PublishButton } from "./publish-button";
@@ -29,10 +30,15 @@ export default async function MyOpportunitiesPage() {
                 <h2 style={{ margin: "8px 0" }}>{opportunity.title}</h2>
                 <p style={{ color: "var(--muted)" }}>{opportunity.organization}</p>
               </div>
-              <PublishButton
-                opportunityId={opportunity.id}
-                isPublished={opportunity.is_published}
-              />
+              <div style={{ display: "flex", gap: 8 }}>
+                <Link href={`/dashboard/employer/opportunities/${opportunity.id}/edit`} className="button">
+                  Edit
+                </Link>
+                <PublishButton
+                  opportunityId={opportunity.id}
+                  isPublished={opportunity.is_published}
+                />
+              </div>
             </div>
           </div>
         ))}
