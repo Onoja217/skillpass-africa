@@ -1,10 +1,19 @@
+
 "use client";
 
 import { useState } from "react";
 import { applyToOpportunity } from "@/lib/applications";
 
-export function ApplyButton({ opportunityId }: { opportunityId: string }) {
-  const [status, setStatus] = useState<"idle" | "loading" | "applied">("idle");
+export function ApplyButton({
+  opportunityId,
+  alreadyApplied,
+}: {
+  opportunityId: string;
+  alreadyApplied: boolean;
+}) {
+  const [status, setStatus] = useState<"idle" | "loading" | "applied">(
+    alreadyApplied ? "applied" : "idle"
+  );
   const [error, setError] = useState<string | null>(null);
 
   async function handleClick() {

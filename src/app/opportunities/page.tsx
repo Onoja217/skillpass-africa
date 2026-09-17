@@ -1,11 +1,13 @@
 
 import { listOpportunities } from "@/lib/opportunities";
 import { getCurrentProfile } from "@/lib/auth";
+import { getMyApplicationIds } from "@/lib/applications";
 import { ApplyButton } from "./apply-button";
 
 export default async function OpportunitiesPage() {
   const opportunities = await listOpportunities();
   const profile = await getCurrentProfile();
+  const appliedIds = await getMyApplicationIds();
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
@@ -33,7 +35,10 @@ export default async function OpportunitiesPage() {
             )}
             {profile.role === "learner" && (
               <div style={{ marginTop: 16 }}>
-                <ApplyButton opportunityId={opportunity.id} />
+                <ApplyButton
+                  opportunityId={opportunity.id}
+                  alreadyApplied={appliedIds.includes(opportunity.id)}
+                />
               </div>
             )}
           </div>
