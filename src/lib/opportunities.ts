@@ -162,3 +162,23 @@ export async function getOpportunity(opportunityId: string) {
 
   return data;
 }
+export async function listAllOpportunitiesForAdmin() {
+  const profile = await getCurrentProfile();
+
+  if (profile.role !== "administrator") {
+    throw new Error("Only administrators can view all opportunities.");
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("opportunities")
+    .select("*, profiles(full_name, email)")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
