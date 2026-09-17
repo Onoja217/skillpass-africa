@@ -53,3 +53,33 @@ export async function getMyApplicationIds() {
 
   return data.map((row) => row.opportunity_id);
 }
+export async function listApplicationsForOpportunity(opportunityId: string) {
+  const profile = await getCurrentProfile();
+  const supabase = await createClient();
+
+  const { data: opportunity, error: oppError } = await supabase
+    .from("opportunities")
+    .select("employer_id")
+    .eq("id", opportunityId)
+    .single();
+
+  if (oppError) {
+    throw new Error(oppError.message);
+  }
+
+  if (opportunity.employer_id !== profile.id) {
+    throw new Error("You can only view applicants for your own opportunities.");
+  }
+
+  const { data, error } = await supabase
+    .from("applications")
+    .select("*, profiles(full_name, email, location, selected_skills)")
+    .eq("opportunity_id", opportunityId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
