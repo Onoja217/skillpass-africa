@@ -15,7 +15,7 @@ export default async function MyOpportunitiesPage() {
       </div>
 
       {opportunities.length === 0 && (
-        <p style={{ color: "var(--muted)" }}>You haven't posted any opportunities yet.</p>
+        <p style={{ color: "var(--muted)" }}>You haven&apos;t posted any opportunities yet.</p>
       )}
 
       <div style={{ display: "grid", gap: 16 }}>
