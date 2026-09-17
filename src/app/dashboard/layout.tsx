@@ -17,6 +17,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <Link href="/dashboard/employer/talent" style={{ padding: 12, borderRadius: 10, fontWeight: 750 }}>Discover talent</Link>
           </>
         )}
+        {profile.role === "administrator" && (
+          <Link href="/dashboard/administrator/opportunities" style={{ padding: 12, borderRadius: 10, fontWeight: 750 }}>Moderate opportunities</Link>
+        )}
         <Link href="/profile" style={{ padding: 12, borderRadius: 10, fontWeight: 750 }}>Edit profile</Link>
       </nav></aside>
       <main style={{ minWidth: 0 }}>{children}</main>
