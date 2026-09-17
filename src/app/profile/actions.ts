@@ -16,8 +16,9 @@ export async function updateProfile(_: AuthState, formData: FormData): Promise<A
   let avatarUrl: string | undefined;
   const avatar = formData.get("avatar");
   if (avatar instanceof File && avatar.size > 0) {
-    if (avatar.size > 2 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp"].includes(avatar.type)) return { error: "Use a JPG, PNG, or WebP image smaller than 2 MB." };
-    const extension = avatar.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const allowed = new Map([["image/jpeg", "jpg"], ["image/png", "png"], ["image/webp", "webp"]]);
+    const extension = allowed.get(avatar.type);
+    if (!extension || avatar.size > 2 * 1024 * 1024) return { error: "Use a JPG, PNG, or WebP image smaller than 2 MB." };
     const path = `${user.id}/avatar.${extension}`;
     const { error: uploadError } = await supabase.storage.from("avatars").upload(path, avatar, { upsert: true, contentType: avatar.type });
     if (uploadError) return { error: uploadError.message };
