@@ -182,3 +182,27 @@ export async function listAllOpportunitiesForAdmin() {
 
   return data;
 }
+export async function adminSetPublishStatus(opportunityId: string, publish: boolean) {
+  const profile = await getCurrentProfile();
+
+  if (profile.role !== "administrator") {
+    throw new Error("Only administrators can moderate opportunities this way.");
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("opportunities")
+    .update({ is_published: publish })
+    .eq("id", opportunityId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/dashboard/administrator");
+  revalidatePath("/opportunities");
+  return data;
+}
