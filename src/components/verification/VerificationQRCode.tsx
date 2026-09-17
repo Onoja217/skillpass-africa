@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import QRCode from "qrcode";
 
 type VerificationQRCodeProps = {
@@ -35,9 +36,12 @@ export default function VerificationQRCode({
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <img
+      <Image
         src={qrCode}
         alt={`QR code for verification ${verificationId}`}
+        width={240}
+        height={240}
+        unoptimized
         className="h-60 w-60 rounded-lg border bg-white p-2"
       />
 

@@ -7,6 +7,14 @@ type ReviewPageProps = {
   params: Promise<{ submissionId: string }>;
 };
 
+type EvidenceFile = {
+  id: string;
+  file_path: string;
+  original_filename: string;
+  mime_type: string;
+  file_size: number;
+};
+
 export default async function ReviewPage({ params }: ReviewPageProps) {
   const { submissionId } = await params;
   const supabase = await createClient();
@@ -24,6 +32,23 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
     .select("title, criteria, instructions, skill_id")
     .eq("id", submission.assessment_id)
     .single();
+
+  const { data: evidenceFiles, error: evidenceError } = await supabase
+    .from("submission_files")
+    .select("id, file_path, original_filename, mime_type, file_size")
+    .eq("submission_id", submission.id)
+    .order("created_at", { ascending: true });
+
+  if (evidenceError) throw new Error("Unable to load submission evidence.");
+
+  const evidence = await Promise.all(
+    ((evidenceFiles ?? []) as EvidenceFile[]).map(async (file) => {
+      const { data, error } = await supabase.storage
+        .from("submission-evidence")
+        .createSignedUrl(file.file_path, 60 * 10);
+      return error || !data?.signedUrl ? null : { ...file, signedUrl: data.signedUrl };
+    }),
+  );
 
   return (
     <main>
@@ -69,6 +94,19 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
         {submission.video_link && (
           <p style={{ marginTop: 12 }}><strong>Video:</strong> <a href={submission.video_link} target="_blank" rel="noreferrer">View video</a></p>
         )}
+        <div style={{ marginTop: 20 }}>
+          <p style={{ color: "var(--muted)" }}>Uploaded evidence</p>
+          {evidence.filter(Boolean).length ? (
+            <ul style={{ margin: 0, paddingLeft: 20 }}>
+              {evidence.filter((file): file is EvidenceFile & { signedUrl: string } => Boolean(file)).map((file) => (
+                <li key={file.id}>
+                  <a href={file.signedUrl} target="_blank" rel="noreferrer">{file.original_filename}</a>
+                  <small style={{ marginLeft: 8, color: "var(--muted)" }}>{Math.ceil(file.file_size / 1024)} KB · {file.mime_type}</small>
+                </li>
+              ))}
+            </ul>
+          ) : <p style={{ color: "var(--muted)" }}>No readable evidence files were uploaded.</p>}
+        </div>
         <p style={{ color: "var(--muted)", fontSize: 14, marginTop: 24 }}>
           Submitted: {submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : "Not submitted"}
         </p>

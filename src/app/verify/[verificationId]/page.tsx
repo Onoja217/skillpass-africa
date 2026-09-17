@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import VerificationQRCode from "@/components/verification/VerificationQRCode";
+import { Brand } from "@/components/brand";
 
 type VerificationPageProps = {
   params: Promise<{
@@ -33,9 +34,7 @@ export default async function VerificationPage({
       <div className="mx-auto max-w-2xl">
         <div className="rounded-2xl border bg-card p-6 shadow-sm sm:p-8">
           <div className="mb-6">
-            <p className="text-sm font-medium text-muted-foreground">
-              SkillPass Africa
-            </p>
+            <Brand />
 
             <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
               Verified Skill
