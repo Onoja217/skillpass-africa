@@ -103,3 +103,62 @@ export async function togglePublish(opportunityId: string, publish: boolean) {
   revalidatePath("/opportunities");
   return data;
 }
+export async function updateOpportunity(
+  opportunityId: string,
+  formData: {
+    title: string;
+    organization: string;
+    description: string;
+    opportunity_type: OpportunityType;
+    required_skills: string[];
+    location?: string;
+    work_arrangement: WorkArrangement;
+    application_deadline?: string;
+    application_instructions?: string;
+  }
+) {
+  const profile = await getCurrentProfile();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("opportunities")
+    .update({
+      title: formData.title,
+      organization: formData.organization,
+      description: formData.description,
+      opportunity_type: formData.opportunity_type,
+      required_skills: formData.required_skills,
+      location: formData.location ?? null,
+      work_arrangement: formData.work_arrangement,
+      application_deadline: formData.application_deadline ?? null,
+      application_instructions: formData.application_instructions ?? null,
+    })
+    .eq("id", opportunityId)
+    .eq("employer_id", profile.id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/dashboard/employer/opportunities");
+  revalidatePath("/opportunities");
+  return data;
+}
+
+export async function getOpportunity(opportunityId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("opportunities")
+    .select("*")
+    .eq("id", opportunityId)
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
