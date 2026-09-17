@@ -31,6 +31,9 @@ export default async function MyOpportunitiesPage() {
                 <p style={{ color: "var(--muted)" }}>{opportunity.organization}</p>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
+                <Link href={`/dashboard/employer/opportunities/${opportunity.id}/applicants`} className="button">
+                  Applicants
+                </Link>
                 <Link href={`/dashboard/employer/opportunities/${opportunity.id}/edit`} className="button">
                   Edit
                 </Link>
