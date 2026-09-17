@@ -1,7 +1,12 @@
+
 import { listOpportunities } from "@/lib/opportunities";
+import { getCurrentProfile } from "@/lib/auth";
+import { ApplyButton } from "./apply-button";
 
 export default async function OpportunitiesPage() {
   const opportunities = await listOpportunities();
+  const profile = await getCurrentProfile();
+
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
       <h1 style={{ fontSize: "clamp(1.75rem,4vw,2.5rem)", marginBottom: 24 }}>
@@ -25,6 +30,11 @@ export default async function OpportunitiesPage() {
               <p style={{ marginTop: 12 }}>
                 <strong>Skills:</strong> {opportunity.required_skills.join(", ")}
               </p>
+            )}
+            {profile.role === "learner" && (
+              <div style={{ marginTop: 16 }}>
+                <ApplyButton opportunityId={opportunity.id} />
+              </div>
             )}
           </div>
         ))}
