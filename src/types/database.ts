@@ -1,5 +1,15 @@
 export const roles = ["learner", "mentor", "employer", "administrator"] as const;
 export type UserRole = (typeof roles)[number];
+
+export const opportunityTypes = ["job", "internship", "apprenticeship", "volunteer"] as const;
+export type OpportunityType = (typeof opportunityTypes)[number];
+
+export const workArrangements = ["remote", "onsite", "hybrid"] as const;
+export type WorkArrangement = (typeof workArrangements)[number];
+
+export const applicationStatuses = ["submitted", "reviewed", "shortlisted", "rejected", "accepted"] as const;
+export type ApplicationStatus = (typeof applicationStatuses)[number];
+
 export const submissionStatuses = ["draft", "submitted", "under_review", "revision_requested", "verified", "rejected"] as const;
 export type SubmissionStatus = (typeof submissionStatuses)[number];
 export type MentorStatus = "pending" | "approved" | "suspended" | "revoked";
@@ -7,7 +17,36 @@ export type VerificationStatus = "active" | "revoked" | "suspended";
 export type AccountStatus = "active" | "suspended";
 export const auditActions = ["LOGIN_SUCCESS", "LOGIN_FAILED", "LOGOUT", "USER_CREATED", "USER_UPDATED", "USER_SUSPENDED", "USER_REACTIVATED", "ROLE_REQUESTED", "ROLE_APPROVED", "ROLE_REJECTED", "ROLE_ASSIGNED", "ROLE_REMOVED", "ROLE_CHANGED", "VERIFICATION_SUBMITTED", "VERIFICATION_APPROVED", "VERIFICATION_REJECTED", "VERIFICATION_REVIEWED", "APPLICATION_SUBMITTED", "APPLICATION_APPROVED", "APPLICATION_REJECTED", "ADMIN_ACTION", "PERMISSION_CHANGED", "SECURITY_EVENT"] as const;
 export type AuditAction = (typeof auditActions)[number];
+
 export type Profile = { id: string; full_name: string; email: string; phone: string | null; location: string | null; biography: string | null; avatar_url: string | null; selected_skills: string[]; role: UserRole; mentor_status: MentorStatus | null; account_status: AccountStatus; created_at: string; updated_at: string };
+
+export type Opportunity = {
+  id: string;
+  employer_id: string;
+  title: string;
+  organization: string;
+  description: string;
+  opportunity_type: OpportunityType;
+  required_skills: string[];
+  location: string | null;
+  work_arrangement: WorkArrangement;
+  application_deadline: string | null;
+  application_instructions: string | null;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Application = {
+  id: string;
+  opportunity_id: string;
+  learner_id: string;
+  cover_note: string | null;
+  status: ApplicationStatus;
+  created_at: string;
+  updated_at: string;
+};
+
 type Category = { id: string; name: string; created_at: string };
 type Skill = { id: string; name: string; description: string | null; category_id: string; created_at: string; updated_at: string };
 type Assessment = { id: string; title: string; skill_id: string; instructions: string; difficulty: string; deadline: string | null; criteria: string; created_by_id: string; created_at: string; updated_at: string };
@@ -21,8 +60,10 @@ type LoginActivity = { id: string; user_id: string | null; identifier: string | 
 type RoleHistory = { id: string; user_id: string; previous_role: UserRole | null; new_role: UserRole; changed_by: string; reason: string | null; created_at: string };
 type AdminPermission = { id: string; permission_key: string; name: string; description: string; created_at: string };
 type RolePermission = { role: UserRole; permission_id: string; granted_by: string | null; created_at: string };
+
 type Relationship = { foreignKeyName: string; columns: string[]; isOneToOne?: boolean; referencedRelation: string; referencedColumns: string[] };
 type Table<T, R extends Relationship[] = []> = { Row: T; Insert: Partial<Omit<T, "id" | "created_at" | "updated_at">> & { id?: string; created_at?: string; updated_at?: string }; Update: Partial<Omit<T, "id" | "created_at" | "updated_at">>; Relationships: R };
+
 type CategoryRelationships = [Relationship & { foreignKeyName: "skills_category_id_fkey"; columns: ["id"]; referencedRelation: "skills"; referencedColumns: ["category_id"] }];
 type SkillRelationships = [Relationship & { foreignKeyName: "skills_category_id_fkey"; columns: ["category_id"]; referencedRelation: "categories"; referencedColumns: ["id"] }];
 type AssessmentRelationships = [Relationship & { foreignKeyName: "assessments_skill_id_fkey"; columns: ["skill_id"]; referencedRelation: "skills"; referencedColumns: ["id"] }];
@@ -35,6 +76,10 @@ type LoginRelationships = [Relationship & { foreignKeyName: "login_activity_user
 type RoleHistoryRelationships = [Relationship & { foreignKeyName: "role_history_user_id_fkey"; columns: ["user_id"]; referencedRelation: "profiles"; referencedColumns: ["id"] }, Relationship & { foreignKeyName: "role_history_changed_by_fkey"; columns: ["changed_by"]; referencedRelation: "profiles"; referencedColumns: ["id"] }];
 type AdminPermissionRelationships = [];
 type RolePermissionRelationships = [Relationship & { foreignKeyName: "role_permissions_permission_id_fkey"; columns: ["permission_id"]; referencedRelation: "admin_permissions"; referencedColumns: ["id"] }, Relationship & { foreignKeyName: "role_permissions_granted_by_fkey"; columns: ["granted_by"]; referencedRelation: "profiles"; referencedColumns: ["id"] }];
+
+type OpportunityRelationships = [Relationship & { foreignKeyName: "opportunities_employer_id_fkey"; columns: ["employer_id"]; referencedRelation: "profiles"; referencedColumns: ["id"] }];
+type ApplicationRelationships = [Relationship & { foreignKeyName: "applications_opportunity_id_fkey"; columns: ["opportunity_id"]; referencedRelation: "opportunities"; referencedColumns: ["id"] }, Relationship & { foreignKeyName: "applications_learner_id_fkey"; columns: ["learner_id"]; referencedRelation: "profiles"; referencedColumns: ["id"] }];
+
 export type AdminReports = {
   period: { from: string; to: string };
   overview: { users: number; learners: number; mentors: number; employers: number; administrators: number; active_users: number; suspended_users: number; skills: number; assessments: number; submissions: number; verified_skills: number };
@@ -48,4 +93,5 @@ export type AdminReports = {
   submission_trend: { date: string; count: number }[];
   recent_admin_activity: { action: AuditAction; description: string; created_at: string }[];
 };
-export type Database = { public: { Tables: { profiles: Table<Profile>; categories: Table<Category, CategoryRelationships>; skills: Table<Skill, SkillRelationships>; assessments: Table<Assessment, AssessmentRelationships>; submissions: Table<Submission, SubmissionRelationships>; submission_files: Table<SubmissionFile>; portfolio_items: Table<PortfolioItem, PortfolioRelationships>; skill_verifications: Table<SkillVerification, VerificationRelationships>; verification_audit_logs: Table<VerificationAuditLog, AuditRelationships>; audit_logs: Table<AuditLog, AuditLogRelationships>; login_activity: Table<LoginActivity, LoginRelationships>; role_history: Table<RoleHistory, RoleHistoryRelationships>; admin_permissions: Table<AdminPermission, AdminPermissionRelationships>; role_permissions: Table<RolePermission, RolePermissionRelationships> }; Views: Record<string, never>; Functions: { get_public_skill_verification: { Args: { verification_public_id: string }; Returns: { public_verification_id: string; learner_name: string; skill_name: string; project_title: string; project_description: string | null; competency_rating: number | null; verified_at: string; decision: "approved"; verification_status: VerificationStatus }[] }; record_auth_security_event: { Args: { event_action: AuditAction; event_type: string; event_description: string; event_metadata?: Record<string, unknown> }; Returns: string }; admin_update_user: { Args: { target_user_id: string; new_role?: UserRole | null; new_account_status?: AccountStatus | null; change_reason?: string | null }; Returns: Profile }; has_admin_permission: { Args: { required_permission: string }; Returns: boolean }; admin_set_role_permission: { Args: { target_role: UserRole; permission_key: string; enabled: boolean }; Returns: undefined }; get_admin_reports: { Args: { p_from: string; p_to: string }; Returns: AdminReports } }; Enums: { user_role: UserRole; submission_status: SubmissionStatus; mentor_status: MentorStatus; verification_decision: "approved" | "rejected" | "revision_requested"; verification_status: VerificationStatus; audit_action: AuditAction; account_status: AccountStatus }; CompositeTypes: Record<string, never> } };
+
+export type Database = { public: { Tables: { profiles: Table<Profile>; categories: Table<Category, CategoryRelationships>; skills: Table<Skill, SkillRelationships>; assessments: Table<Assessment, AssessmentRelationships>; submissions: Table<Submission, SubmissionRelationships>; submission_files: Table<SubmissionFile>; portfolio_items: Table<PortfolioItem, PortfolioRelationships>; skill_verifications: Table<SkillVerification, VerificationRelationships>; verification_audit_logs: Table<VerificationAuditLog, AuditRelationships>; audit_logs: Table<AuditLog, AuditLogRelationships>; login_activity: Table<LoginActivity, LoginRelationships>; role_history: Table<RoleHistory, RoleHistoryRelationships>; admin_permissions: Table<AdminPermission, AdminPermissionRelationships>; role_permissions: Table<RolePermission, RolePermissionRelationships>; opportunities: Table<Opportunity, OpportunityRelationships>; applications: Table<Application, ApplicationRelationships> }; Views: Record<string, never>; Functions: { get_public_skill_verification: { Args: { verification_public_id: string }; Returns: { public_verification_id: string; learner_name: string; skill_name: string; project_title: string; project_description: string | null; competency_rating: number | null; verified_at: string; decision: "approved"; verification_status: VerificationStatus }[] }; record_auth_security_event: { Args: { event_action: AuditAction; event_type: string; event_description: string; event_metadata?: Record<string, unknown> }; Returns: string }; admin_update_user: { Args: { target_user_id: string; new_role?: UserRole | null; new_account_status?: AccountStatus | null; change_reason?: string | null }; Returns: Profile }; has_admin_permission: { Args: { required_permission: string }; Returns: boolean }; admin_set_role_permission: { Args: { target_role: UserRole; permission_key: string; enabled: boolean }; Returns: undefined }; get_admin_reports: { Args: { p_from: string; p_to: string }; Returns: AdminReports } }; Enums: { user_role: UserRole; submission_status: SubmissionStatus; mentor_status: MentorStatus; verification_decision: "approved" | "rejected" | "revision_requested"; verification_status: VerificationStatus; audit_action: AuditAction; account_status: AccountStatus; opportunity_type: OpportunityType; work_arrangement: WorkArrangement; application_status: ApplicationStatus }; CompositeTypes: Record<string, never> } };
