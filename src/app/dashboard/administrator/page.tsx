@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { requireAdministrator } from "@/lib/admin/permissions";
+import { hasAdminPermission, requireAdministrator } from "@/lib/admin/permissions";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminSection } from "@/components/admin/admin-section";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
@@ -10,7 +10,6 @@ import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 export default async function AdministratorDashboardPage() {
   await requireAdministrator();
   const supabase = await createClient();
-  const { hasAdminPermission } = await import("@/lib/admin/permissions");
   const [canViewAudit, canReviewVerifications] = await Promise.all([
     hasAdminPermission("audit.view"),
     hasAdminPermission("verifications.review"),
