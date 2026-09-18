@@ -82,12 +82,19 @@ type ApplicationRelationships = [Relationship & { foreignKeyName: "applications_
 
 export type AdminReports = {
   period: { from: string; to: string };
-  overview: { users: number; learners: number; mentors: number; employers: number; administrators: number; active_users: number; suspended_users: number; skills: number; assessments: number; submissions: number; verified_skills: number };
-  period_activity: { new_users: number; assessments_created: number; submissions_created: number; verifications_created: number };
+  overview: { users: number; learners: number; mentors: number; employers: number; administrators: number; active_users: number; suspended_users: number; skills: number; assessments: number; submissions: number; verified_skills: number; opportunities: number; applications: number };
+  period_activity: { new_users: number; assessments_created: number; submissions_created: number; verifications_created: number; opportunities_created: number; applications_created: number };
   verification: { approved: number; rejected: number; revision_requested: number; active: number; suspended: number; revoked: number; average_rating: number };
   submissions: { draft: number; submitted: number; under_review: number; revision_requested: number; verified: number; rejected: number };
+  opportunities: { total: number; published: number; jobs: number; internships: number; apprenticeships: number; volunteer: number };
+  applications: { total: number; submitted: number; reviewed: number; shortlisted: number; rejected: number; accepted: number; acceptance_rate: number };
+  learner_outcomes: { learners_with_submissions: number; learners_verified: number; learners_with_applications: number; learners_accepted: number; verified_to_application_rate: number };
+  mentor_activity: { active_mentors: number; reviews_recorded: number; approved_reviews: number; average_rating: number };
+  employer_activity: { active_employers: number; opportunities_created: number; published_opportunities: number; applications_received: number };
+  skills_by_category: { category: string; skills: number; assessments: number }[];
   security: { audit_events: number; failed_logins: number; successful_logins: number; security_events: number; permission_changes: number; admin_actions: number };
   user_roles: Record<string, number>;
+  application_trend: { date: string; count: number }[];
   user_trend: { date: string; count: number }[];
   verification_trend: { date: string; count: number }[];
   submission_trend: { date: string; count: number }[];
