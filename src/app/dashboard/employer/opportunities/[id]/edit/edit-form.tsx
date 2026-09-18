@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateOpportunity } from "@/lib/opportunities";
-import { opportunityTypes, workArrangements, type Opportunity } from "@/types/database";
+import { opportunityTypes, workArrangements, type Opportunity, type OpportunityType, type WorkArrangement } from "@/types/database";
 
 export function EditForm({ opportunity }: { opportunity: Opportunity }) {
   const router = useRouter();
@@ -23,10 +24,10 @@ export function EditForm({ opportunity }: { opportunity: Opportunity }) {
         title: form.get("title") as string,
         organization: form.get("organization") as string,
         description: form.get("description") as string,
-        opportunity_type: form.get("opportunity_type") as any,
+        opportunity_type: form.get("opportunity_type") as OpportunityType,
         required_skills: skillsRaw.split(",").map((s) => s.trim()).filter(Boolean),
         location: (form.get("location") as string) || undefined,
-        work_arrangement: form.get("work_arrangement") as any,
+        work_arrangement: form.get("work_arrangement") as WorkArrangement,
         application_deadline: (form.get("application_deadline") as string) || undefined,
         application_instructions: (form.get("application_instructions") as string) || undefined,
       });
