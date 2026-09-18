@@ -10,6 +10,11 @@ import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 export default async function AdministratorDashboardPage() {
   await requireAdministrator();
   const supabase = await createClient();
+  const { hasAdminPermission } = await import("@/lib/admin/permissions");
+  const [canViewAudit, canReviewVerifications] = await Promise.all([
+    hasAdminPermission("audit.view"),
+    hasAdminPermission("verifications.review"),
+  ]);
   const [usersResult, learnersResult, mentorsResult, employersResult, pendingMentorsResult, submissionsResult, pendingSubmissionsResult, verificationsResult, activeVerificationsResult, suspendedVerificationsResult, recentVerificationsResult, auditResult] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "learner"),
@@ -18,14 +23,14 @@ export default async function AdministratorDashboardPage() {
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "mentor").eq("mentor_status", "pending"),
     supabase.from("submissions").select("id", { count: "exact", head: true }),
     supabase.from("submissions").select("id", { count: "exact", head: true }).in("status", ["submitted", "under_review"]),
-    supabase.from("skill_verifications").select("id", { count: "exact", head: true }),
-    supabase.from("skill_verifications").select("id", { count: "exact", head: true }).eq("verification_status", "active"),
-    supabase.from("skill_verifications").select("id", { count: "exact", head: true }).eq("verification_status", "suspended"),
-    supabase.from("skill_verifications").select("id, decision, competency_rating, verified_at, public_verification_id, verification_status").order("verified_at", { ascending: false }).limit(5),
-    supabase.from("audit_logs").select("id, action, description, actor_role, created_at").order("created_at", { ascending: false }).limit(5),
+    canReviewVerifications ? supabase.from("skill_verifications").select("id", { count: "exact", head: true }) : Promise.resolve({ count: null, error: null, data: [] }),
+    canReviewVerifications ? supabase.from("skill_verifications").select("id", { count: "exact", head: true }).eq("verification_status", "active") : Promise.resolve({ count: null, error: null, data: [] }),
+    canReviewVerifications ? supabase.from("skill_verifications").select("id", { count: "exact", head: true }).eq("verification_status", "suspended") : Promise.resolve({ count: null, error: null, data: [] }),
+    canReviewVerifications ? supabase.from("skill_verifications").select("id, decision, competency_rating, verified_at, public_verification_id, verification_status").order("verified_at", { ascending: false }).limit(5) : Promise.resolve({ count: null, error: null, data: [] }),
+    canViewAudit ? supabase.from("audit_logs").select("id, action, description, actor_role, created_at").order("created_at", { ascending: false }).limit(5) : Promise.resolve({ count: null, error: null, data: [] }),
   ]);
   const errors = [usersResult.error, learnersResult.error, mentorsResult.error, employersResult.error, pendingMentorsResult.error, submissionsResult.error, pendingSubmissionsResult.error, verificationsResult.error, activeVerificationsResult.error, suspendedVerificationsResult.error, recentVerificationsResult.error, auditResult.error].filter(Boolean);
-  if (errors.length) throw new Error("Unable to load the administrator dashboard.");
+  if (errors.length) console.error("Administrator dashboard data query failed:", errors.map((error) => error?.message));
 
   const users = usersResult.count ?? 0;
   const learners = learnersResult.count ?? 0;
@@ -39,7 +44,13 @@ export default async function AdministratorDashboardPage() {
   const suspendedVerifications = suspendedVerificationsResult.count ?? 0;
 
   return (
-    <div style={{ display: "grid", gap: 28 }}>\n      {errors.length ? (\n        <section className="notice" role="status">\n          <strong>Some administrator data is temporarily unavailable.</strong>\n          <p style={{ margin: "6px 0 0", color: "var(--muted)" }}>The dashboard is still available. Affected metrics will show as zero or empty until the related data service is available.</p>\n        </section>\n      ) : null}
+    <div style={{ display: "grid", gap: 28 }}>
+      {errors.length ? (
+        <section className="notice" role="status">
+          <strong>Some administrator data is temporarily unavailable.</strong>
+          <p style={{ margin: "6px 0 0", color: "var(--muted)" }}>The dashboard is still available. Affected metrics will show as zero or empty until the related data service is available.</p>
+        </section>
+      ) : null}
       <AdminPageHeader
         eyebrow="Administrator dashboard"
         title="Platform overview"
