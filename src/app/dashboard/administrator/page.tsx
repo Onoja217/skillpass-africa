@@ -39,7 +39,7 @@ export default async function AdministratorDashboardPage() {
   const suspendedVerifications = suspendedVerificationsResult.count ?? 0;
 
   return (
-    <div style={{ display: "grid", gap: 28 }}>
+    <div style={{ display: "grid", gap: 28 }}>\n      {errors.length ? (\n        <section className="notice" role="status">\n          <strong>Some administrator data is temporarily unavailable.</strong>\n          <p style={{ margin: "6px 0 0", color: "var(--muted)" }}>The dashboard is still available. Affected metrics will show as zero or empty until the related data service is available.</p>\n        </section>\n      ) : null}
       <AdminPageHeader
         eyebrow="Administrator dashboard"
         title="Platform overview"
